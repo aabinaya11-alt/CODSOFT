@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basic Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #2a2f53 0%, rgb(105, 67, 67) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .calculator {
+            background-color: #2c2c2c;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 320px;
+        }
+        
+        .calculator-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .display {
+            background-color: black;
+            color: whitesmoke;
+            font-size: 2.2rem;
+            font-weight: bold;
+            text-align: right;
+            padding: 25px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            border: 2px solid grey;
+            overflow: hidden;
+            word-break: break-all;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .btn {
+            background-color: grey;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            height: 65px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn.number {
+            background-color: white;
+            color: black;
+        }
+
+        .btn.number:hover {
+            background-color: white;
+            color: black;
+        }
+
+        .btn.operator {
+            background-color: purple;
+            color: black;
+        }
+
+        .btn.operator:hover {
+            background-color: purple;
+            color: black;
+        }
+
+        .btn.clear {
+            background-color: purple;
+            color: black;
+        }
+
+        .btn.clear:hover {
+            background-color: purple;
+            color: black;
+        }
+
+        .btn.equals {
+            background-color: purple;
+            color: black;
+        }
+
+        .btn.equals:hover {
+            background-color: purple;
+            color:black;
+        }
+
+        .btn.zero {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 400px) {
+            .calculator {
+                max-width: 280px;
+                padding: 20px;
+            }
+
+            .calculator-title {
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+            }
+            
+            .display {
+                font-size: 1.8rem;
+                padding: 20px 15px;
+            }
+            
+            .btn {
+                font-size: 1.2rem;
+                height: 55px;
+            }
+            
+            .button-grid {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="calculator-title">CALCULATOR</div>
+        <div class="display" id="display">0</div>
+        
+        <div class="button-grid">
+
+            <button class="btn clear" onclick="clearCalculator('C')">C</button>
+            <button class="btn operator" onclick="handleOperator('/')">/</button>
+            <button class="btn operator" onclick="handleOperator('*')">*</button>
+            <button class="btn operator" onclick="handleOperator('-')">-</button>
+            
+            <button class="btn number" onclick="handleNumber('7')">7</button>
+            <button class="btn number" onclick="handleNumber('8')">8</button>
+            <button class="btn number" onclick="handleNumber('9')">9</button>
+            <button class="btn operator" onclick="handleOperator('+')">+</button>
+            
+            <button class="btn number" onclick="handleNumber('4')">4</button>
+            <button class="btn number" onclick="handleNumber('5')">5</button>
+            <button class="btn number" onclick="handleNumber('6')">6</button>
+            <button class="btn equals" onclick="calculateResult()" rowspan="2">=</button>
+            
+            <button class="btn number" onclick="handleNumber('1')">1</button>
+            <button class="btn number" onclick="handleNumber('2')">2</button>
+            <button class="btn number" onclick="handleNumber('3')">3</button>
+            
+            <button class="btn number zero" onclick="handleNumber('0')">0</button>
+            <button class="btn number" onclick="handleDecimal()">.</button>
+        </div>
+    </div>
+
+    <script>
+        let displayValue = '0';
+        let previousValue = null;
+        let currentOperator = null;
+        let waitingForOperand = false;
+
+        const display = document.getElementById('display');
+
+        function updateDisplay() {
+            display.textContent = displayValue;
+        }
+
+        function handleNumber(number) {
+            if (waitingForOperand) {
+                displayValue = number;
+                waitingForOperand = false;
+            } else {
+                displayValue = displayValue === '0' ? number : displayValue + number;
+            }
+            updateDisplay();
+        }
+
+        function handleDecimal() {
+            if (waitingForOperand) {
+                displayValue = '0.';
+                waitingForOperand = false;
+            } else if (displayValue.indexOf('.') === -1) {
+                displayValue += '.';
+            }
+            updateDisplay();
+        }
+
+        function handleOperator(operator) {
+            const inputValue = parseFloat(displayValue);
+
+            if (previousValue === null) {
+                previousValue = inputValue;
+            } 
+            else if (currentOperator) {
+                const result = performCalculation(previousValue, inputValue, currentOperator);
+                
+                displayValue = String(result);
+                previousValue = result;
+                updateDisplay();
+            }
+
+            waitingForOperand = true;
+            currentOperator = operator;
+        }
+
+        function performCalculation(firstValue, secondValue, operator) {
+            let result;
+
+            if (operator === '+') {
+                result = firstValue + secondValue;
+            } else if (operator === '-') {
+                result = firstValue - secondValue;
+            } else if (operator === '*') {
+                result = firstValue * secondValue;
+            } else if (operator === '/') {
+                if (secondValue === 0) {
+                    alert('Error: Cannot divide by zero!');
+                    return firstValue;
+                }
+                result = firstValue / secondValue;
+            } else {
+                return secondValue;
+            }
+
+            return Math.round((result + Number.EPSILON) * 100000000) / 100000000;
+        }
+
+        function calculateResult() {
+            const inputValue = parseFloat(displayValue);
+
+            if (previousValue !== null && currentOperator) {
+                const result = performCalculation(previousValue, inputValue, currentOperator);
+                
+                displayValue = String(result);
+                previousValue = null;
+                currentOperator = null;
+                waitingForOperand = true;
+                updateDisplay();
+            }
+        }
+
+        function clearCalculator() {
+            displayValue = '0';
+            previousValue = null;
+            currentOperator = null;
+            waitingForOperand = false;
+            updateDisplay();
+        }
+
+        document.addEventListener('keydown', function(event) {
+            const key = event.key;
+
+            if (key >= '0' && key <= '9') {
+                handleNumber(key);
+            }
+            else if (key === '+') {
+                handleOperator('+');
+            } else if (key === '-') {
+                handleOperator('-');
+            } else if (key === '*') {
+                handleOperator('*');
+            } else if (key === '/') {
+                event.preventDefault(); 
+                handleOperator('/');
+            }
+            else if (key === '.') {
+                handleDecimal();
+            }
+            else if (key === '=' || key === 'Enter') {
+                event.preventDefault();
+                calculateResult();
+            }
+            else if (key === 'c' || key === 'C' || key === 'Escape') {
+                clearCalculator();
+            }
+            else if (key === 'Backspace') {
+                if (displayValue.length > 1) {
+                    displayValue = displayValue.slice(0, -1);
+                } else {
+                    displayValue = '0';
+                }
+                updateDisplay();
+            }
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
